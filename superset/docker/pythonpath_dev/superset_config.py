@@ -106,6 +106,7 @@ SQLLAB_CTAS_NO_LIMIT = True
 OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
 TALISMAN_ENABLED = False
 ENABLE_CORS = True
+WTF_CSRF_ENABLED = False
 HTTP_HEADERS={"X-Frame-Options":"ALLOWALL"}
 #
 # Optionally import superset_config_docker.py (which will have been included on
