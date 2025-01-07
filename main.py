@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, validator
 import io 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import logging
 
 # Thiết lập logging
@@ -36,7 +36,36 @@ POSTGRES_DB = os.getenv("POSTGRES_DB", "superset_test")
 DATABASE_URI = f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 engine = create_engine(DATABASE_URI)
 
-# Định nghĩa mô hình Pydantic cho yêu cầu tạo biểu đồ
+# Định nghĩa các mô hình Pydantic đã trình bày ở phần trước
+class EngineInformation(BaseModel):
+    disable_ssh_tunneling: bool = Field(..., example=True)
+    supports_file_upload: bool = Field(..., example=True)
+
+class DatabaseParameters(BaseModel):
+    username: str = Field(..., example="admin")
+    password: str = Field(..., example="admin")
+    host: str = Field(..., example="172.17.0.1")
+    port: str = Field(..., example="5435")
+    database: str = Field(..., example="superset_test")
+
+class DatabaseRequest(BaseModel):
+    database_name: str = Field(..., example="abc")
+    engine: str = Field(..., example="postgresql")
+    configuration_method: str = Field(..., example="dynamic_form")
+    engine_information: EngineInformation = Field(..., example={"disable_ssh_tunneling": True, "supports_file_upload": True})
+    driver: str = Field(..., example="psycopg2")
+    sqlalchemy_uri_placeholder: str = Field(..., example="postgresql://user:password@host:port/dbname[?key=value&key=value...]")
+    extra: str = Field(..., example='{"allows_virtual_table_explore":true}')
+    expose_in_sqllab: bool = Field(..., example=True)
+    parameters: DatabaseParameters = Field(..., example={"username": "admin", "password": "admin", "host": "172.17.0.1", "port": "5435", "database": "superset_test"})
+    masked_encrypted_extra: str = Field(..., example="{}")
+    
+    @validator('sqlalchemy_uri_placeholder')
+    def validate_sqlalchemy_uri_placeholder(cls, v):
+        if not v.startswith("postgresql://") and not v.startswith("postgresql+psycopg2://"):
+            raise ValueError("sqlalchemy_uri_placeholder phải bắt đầu bằng 'postgresql://' hoặc 'postgresql+psycopg2://'")
+        return v
+
 class ChartRequest(BaseModel):
     cache_timeout: int = Field(..., example=0)
     certification_details: Optional[str] = Field("", example="Chi tiết chứng nhận")
@@ -49,7 +78,7 @@ class ChartRequest(BaseModel):
     external_url: Optional[str] = Field("", example="http://example.com")
     is_managed_externally: bool = Field(..., example=False)
     owners: List[int] = Field(..., example=[1])
-    params: str = Field(..., example="{\"datasource\":\"94__table\",\"viz_type\":\"pie\",\"groupby\":[\"Trạng thái học\"],\"metric\":\"count\",\"adhoc_filters\":[],\"row_limit\":1000,\"sort_by_metric\":true,\"color_scheme\":\"bnbColors\",\"show_labels_threshold\":5,\"show_legend\":true,\"legendType\":\"scroll\",\"legendOrientation\":\"top\",\"label_type\":\"key\",\"show_labels\":true,\"labels_outside\":true,\"outerRadius\":70,\"innerRadius\":30,\"extra_form_data\":{},\"dashboards\":[17]}")
+    params: str = Field(..., example='{"datasource":"94__table","viz_type":"pie","groupby":["Giới tính"],"metrics":["count"],"dashboards":[17]}')
     query_context: Optional[str] = Field("", example="Context info")
     query_context_generation: bool = Field(..., example=False)
     slice_name: str = Field(..., example="Tỷ lệ Giới Tính Sinh Viên")
@@ -243,4 +272,53 @@ def get_embed_link(dashboard_id: int):
 
     except Exception as e:
         logger.error(f"Lỗi không mong muốn: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Endpoint tạo database
+@app.post("/create_database")
+def create_database(request: DatabaseRequest):
+    try:
+        logger.info(f"Nhận yêu cầu tạo database: {request.database_name}")
+        headers = get_header()
+
+        # Xây dựng sqlalchemy_uri từ parameters
+        sqlalchemy_uri = f"postgresql://{request.parameters.username}:{request.parameters.password}@{request.parameters.host}:{request.parameters.port}/{request.parameters.database}"
+
+        # Xây dựng payload cho Superset API
+        database_payload = {
+            "database_name": request.database_name,
+            "engine": request.engine,
+            "configuration_method": request.configuration_method,
+            "engine_information": request.engine_information.dict(),
+            "driver": request.driver,
+            "sqlalchemy_uri_placeholder": request.sqlalchemy_uri_placeholder,
+            "extra": request.extra,
+            "expose_in_sqllab": request.expose_in_sqllab,
+            "parameters": request.parameters.dict(),
+            "masked_encrypted_extra": request.masked_encrypted_extra,
+            "sqlalchemy_uri": sqlalchemy_uri  # Truyền sqlalchemy_uri được xây dựng
+        }
+
+        # Gửi yêu cầu tới Superset API để tạo database
+        database_url = f"{SUPERSET_URL}/api/v1/database/"
+        database_response = requests.post(database_url, headers=headers, json=database_payload)
+
+        if database_response.status_code != 201:
+            logger.error(f"Tạo database thất bại: {database_response.text}")
+            raise HTTPException(status_code=database_response.status_code, detail=database_response.text)
+
+        database_id = database_response.json().get("id")
+        if not database_id:
+            logger.error("Superset không trả về database ID.")
+            raise HTTPException(status_code=500, detail="Superset không trả về database ID.")
+
+        logger.info(f"Tạo database thành công với ID: {database_id}")
+
+        return {"message": "Database đã được tạo thành công", "database_id": database_id}
+
+    except HTTPException as he:
+        logger.error(f"HTTPException: {he.detail}")
+        raise he
+    except Exception as e:
+        logger.exception("Đã xảy ra lỗi không mong muốn.")
         raise HTTPException(status_code=500, detail=str(e))
