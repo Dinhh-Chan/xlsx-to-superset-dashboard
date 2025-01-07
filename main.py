@@ -71,3 +71,84 @@ async def upload_excel(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(db_err))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+@app.post("/create_chart")
+def create_chart(
+    dataset_id: int,
+    chart_type: str,
+    chart_name: str,
+    metrics: list, 
+    dimensions: list,
+    additional_params: dict= None 
+):
+    try :
+        headers = get_header 
+        params = {
+            "metrics": metrics,
+            "groupby": dimensions,
+            "adhoc_filters": [],
+            "row_limit": 1000,
+            "order_desc": True,
+            "since": "100 years ago",
+            "until": "now",
+        }
+        if chart_type == "pie":
+            params.update({
+                "color_scheme": "bnbColors",
+                "donut": False,
+                "show_legend": True,
+            })
+        elif chart_type == "pie_donut":
+            params.update({
+                "color_scheme": "bnbColors",
+                "donut": True,
+                "show_legend": True,
+            })
+        elif chart_type == "bar":
+            params.update({
+                "color_scheme": "bnbColors",
+                "show_legend": True,
+                "bar_stacked": False,  # False cho cột đơn, True cho cột chồng
+            })
+        elif chart_type == "bar_stacked":
+            params.update({
+                "color_scheme": "bnbColors",
+                "show_legend": True,
+                "bar_stacked": True,
+            })
+        elif chart_type == "line":
+            params.update({
+                "color_scheme": "bnbColors",
+                "show_legend": True,
+            })
+        elif chart_type == "number":
+            params = {  # Các tham số cụ thể cho biểu đồ số
+                "metric": metrics[0],
+                "number_format": "SMART_NUMBER",
+                "label": chart_name
+            }
+        else:
+            raise HTTPException(status_code=400, detail="Loại biểu đồ không được hỗ trợ")
+
+        if additional_params:
+            params.update(additional_params)
+
+        chart_payload = {
+            "slice_name": chart_name,
+            "viz_type": chart_type,
+            "datasource_id": dataset_id,
+            "datasource_type": "table",
+            "params": params
+        }
+
+        chart_url = f"{SUPERSET_URL}/api/v1/chart/"
+        chart_response = requests.post(chart_url, headers=headers, data=json.dumps(chart_payload))
+
+        if chart_response.status_code != 201:
+            raise HTTPException(status_code=chart_response.status_code, detail=chart_response.text)
+
+        chart_id = chart_response.json()["id"]
+
+        return {"message": "Biểu đồ đã được tạo thành công", "chart_id": chart_id}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
