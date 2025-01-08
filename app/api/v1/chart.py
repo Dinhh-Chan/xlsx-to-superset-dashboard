@@ -2,7 +2,9 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.chart import PieChartRequest  # Ensure the path is correct
-from app.models.barchat import BarChartRequest  # Define this similarly to PieChartRequest
+from app.models.barchat import BarChartRequest 
+from app.models.linechart import LineChartRequest 
+from app.models.number import NumberChartRequest  # Define this similarly to PieChartRequest
 from app.utils.auth import get_superset_headers
 from app.core.config import settings
 from app.utils.logger import get_logger
@@ -78,6 +80,15 @@ def create_chart_pie(
         raise HTTPException(status_code=500, detail=str(e))
 @router.post("create_bar_chart")
 def create_bar_chart(request: BarChartRequest, headers: Dict[str, str] = Depends(get_headers_dependency)):
+    try :
+        return create_chart(request, headers)
+    except HTTPException as he:
+        logger.error(f"HTTPException: {he.detail}")
+        raise he
+    except Exception as e:
+        logger.exception("An unexpected error occurred.")
+@router.post("create_line_chart")
+def create_bar_chart(request: LineChartRequest, headers: Dict[str, str] = Depends(get_headers_dependency)):
     try :
         return create_chart(request, headers)
     except HTTPException as he:
