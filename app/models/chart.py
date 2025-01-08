@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, validator
 from typing import List, Optional
 import json
 
-class ChartRequest(BaseModel):
+class PieChartRequest(BaseModel):
     cache_timeout: int = Field(..., example=0)
     certification_details: Optional[str] = Field("", example="Chi tiết chứng nhận")
     certified_by: Optional[str] = Field("", example="Người chứng nhận")
@@ -14,7 +14,7 @@ class ChartRequest(BaseModel):
     external_url: Optional[str] = Field("", example="http://example.com")
     is_managed_externally: bool = Field(..., example=False)
     owners: List[int] = Field(..., example=[1])
-    params: str = Field(..., example='{"datasource":"94__table","viz_type":"pie","groupby":["Giới tính"],"metrics":["count"],"dashboards":[17]}')
+    params: str = Field(..., example="{\"viz_type\":\"pie\",\"groupby\":[\"Giới tính\"],\"metric\":\"count\",\"adhoc_filters\":[],\"row_limit\":10000,\"sort_by_metric\":true,\"color_scheme\":\"supersetColors\",\"show_labels_threshold\":1,\"show_legend\":true,\"legendType\":\"scroll\",\"legendOrientation\":\"top\",\"label_type\":\"key_value_percent\",\"number_format\":\",d\",\"date_format\":\"smart_date\",\"show_labels\":true,\"labels_outside\":true,\"label_line\":true,\"show_total\":true,\"outerRadius\":70,\"donut\":true,\"innerRadius\":30,\"extra_form_data\":{}}")
     query_context: Optional[str] = Field("", example="Context info")
     query_context_generation: bool = Field(..., example=False)
     slice_name: str = Field(..., example="Tỷ lệ Giới Tính Sinh Viên")
