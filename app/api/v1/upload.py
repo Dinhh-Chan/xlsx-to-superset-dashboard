@@ -23,6 +23,7 @@ async def upload_excel(
     database_id: int = Form(...)
 ):
     try:
+
         logger.info(f"Nhận yêu cầu upload file: {file.filename} với Database ID: {database_id}")
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))

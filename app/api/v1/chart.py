@@ -19,20 +19,20 @@ def create_chart(request: PieChartRequest, headers: Dict[str, str]) -> Dict[str,
 
     # Validate datasource existence
     datasource_url = f"{settings.SUPERSET_URL}/api/v1/dataset/{request.datasource_id}"
-    datasource_response = requests.get(datasource_url, headers=headers)
-    if datasource_response.status_code != 200:
-        error_msg = f"Datasource with ID {request.datasource_id} does not exist."
-        logger.error(error_msg)
-        raise HTTPException(status_code=404, detail=error_msg)
+    # datasource_response = requests.get(datasource_url, headers=headers)
+    # if datasource_response.status_code != 200:
+    #     error_msg = f"Datasource with ID {request.datasource_id} does not exist."
+    #     logger.error(error_msg)
+    #     raise HTTPException(status_code=404, detail=error_msg)
 
-    # Validate dashboards existence
-    for dashboard_id in request.dashboards:
-        dashboard_url = f"{settings.SUPERSET_URL}/api/v1/dashboard/{dashboard_id}"
-        dashboard_response = requests.get(dashboard_url, headers=headers)
-        if dashboard_response.status_code != 200:
-            error_msg = f"Dashboard with ID {dashboard_id} does not exist."
-            logger.error(error_msg)
-            raise HTTPException(status_code=404, detail=error_msg)
+    # # Validate dashboards existence
+    # for dashboard_id in request.dashboards:
+    #     dashboard_url = f"{settings.SUPERSET_URL}/api/v1/dashboard/{dashboard_id}"
+    #     dashboard_response = requests.get(dashboard_url, headers=headers)
+    #     if dashboard_response.status_code != 200:
+    #         error_msg = f"Dashboard with ID {dashboard_id} does not exist."
+    #         logger.error(error_msg)
+    #         raise HTTPException(status_code=404, detail=error_msg)
 
     # Construct payload for Superset API
     chart_payload = {
