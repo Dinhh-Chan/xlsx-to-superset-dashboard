@@ -96,3 +96,12 @@ def create_bar_chart(request: LineChartRequest, headers: Dict[str, str] = Depend
         raise he
     except Exception as e:
         logger.exception("An unexpected error occurred.")
+@router.post("create_number_chart")
+def create_bar_chart(request: NumberChartRequest, headers: Dict[str, str] = Depends(get_headers_dependency)):
+    try :
+        return create_chart(request, headers)
+    except HTTPException as he:
+        logger.error(f"HTTPException: {he.detail}")
+        raise he
+    except Exception as e:
+        logger.exception("An unexpected error occurred.")
