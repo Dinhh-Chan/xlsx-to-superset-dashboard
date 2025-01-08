@@ -28,13 +28,13 @@ source/venv/bin/activate
   uvicorn main:app --reload
   ```
 
-### Gọi các API cần thiết 
+### Gọi các API cần thiết
 
-#### /api/v1/database/create_database 
+#### /api/v1/database/create_database
 
-Tác dụng: Tạo 1 database connection đến superset 
+Tác dụng: Tạo 1 database connection đến superset
 
-Param requests 
+Param requests
 
 ```
 {
@@ -69,17 +69,15 @@ Param requests
 }
 ```
 
-
 Các tham số chỉnh sửa: "database_name", "engine", "parameters"
 
-Sau đó sẽ trả về id database, nhớ lưu lại 
+Sau đó sẽ trả về id database, nhớ lưu lại
 
 #### /api/v1/upload/upload_excel_to_create_dataset
 
-Tác dụng: Tạo 1 dataset và trả về id của dataset đó 
+Tác dụng: Tạo 1 dataset và trả về id của dataset đó
 
 Parameter requets
-
 
 {
 	file
@@ -87,12 +85,36 @@ Parameter requets
 
 }
 
-
 #### /api/v1/chart/create_chart_pie
 
-Tác dụng: Tạo 1 piechart và trả về id của piechart đó 
+Tác dụng: Tạo 1 piechart và trả về id của piechart đó
 
-Param requests {
+Param requests 
+
+```
+{
+  "cache_timeout": 0,
+  "certification_details": "",
+  "certified_by": "",
+  "dashboards": [
+    17
+  ],
+  "datasource_id": 94,
+  "datasource_name": "data_example",
+  "datasource_type": "table",
+  "description": "",
+  "external_url": "",
+  "is_managed_externally": false,
+  "owners": [
+    1
+  ],
+  "params": "{\"viz_type\":\"pie\",\"groupby\":[\"Giới tính\", \"Tôn giáo\"],\"metric\":\"count\",\"adhoc_filters\":[],\"row_limit\":10000,\"sort_by_metric\":true,\"color_scheme\":\"supersetColors\",\"show_labels_threshold\":1,\"show_legend\":true,\"legendType\":\"scroll\",\"legendOrientation\":\"top\",\"label_type\":\"key_value_percent\",\"number_format\":\",d\",\"date_format\":\"smart_date\",\"show_labels\":true,\"labels_outside\":true,\"label_line\":true,\"show_total\":true,\"outerRadius\":70,\"donut\":true,\"innerRadius\":30,\"extra_form_data\":{}}",
+  "query_context": "",
+  "query_context_generation": false,
+  "slice_name": "Tỷ lệ Giới Tính Sinh Viên",
+  "viz_type": "pie"
+}
+```
 
 Tham số cần chỉnh sửa :
 
@@ -101,7 +123,7 @@ Tham số cần chỉnh sửa :
 
 #### /api/v1/chartcreate_bar_chart
 
-Chức năng: Tạo barchart và trả về id của biểu đồ 
+Chức năng: Tạo barchart và trả về id của biểu đồ
 
 Param Requests
 
@@ -130,7 +152,7 @@ Param Requests
 }
 ```
 
-Các thông số có thể chỉnh sửa 
+Các thông số có thể chỉnh sửa
 
 * \"x_axis\":\"Trạng thái học\" (có thể thay bằng trường thông tin khác trong bảng)
 * \"groupby\":[] (Có thể thêm 1 số trường thông tin khác cho biểu đồ)
@@ -168,7 +190,7 @@ Param requests
 
 ```
 
-Các tham số có thể chỉnh sửa: 
+Các tham số có thể chỉnh sửa:
 
 * "x_axis\":\"Trạng thái học\" (có thể thay bằng trường thông tin khác trong bảng)
 * \"groupby\":[] (Có thể thêm 1 số trường thông tin khác cho biểu đồ)
@@ -206,8 +228,7 @@ Param Requests
 
 ```
 
-Các thông số có thể chỉnh sửa 
-
+Các thông số có thể chỉnh sửa
 
 ```json
  \"metric\":{\"aggregate\":\"COUNT_DISTINCT\"
