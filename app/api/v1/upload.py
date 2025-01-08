@@ -1,6 +1,4 @@
-# app/api/v1/upload.py
-
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException, Form
 from app.utils.auth import get_superset_headers
 from app.core.config import settings
 from app.utils.logger import get_logger
@@ -11,6 +9,7 @@ import io
 import os
 import json
 import requests
+
 router = APIRouter()
 logger = get_logger(__name__)
 
@@ -18,10 +17,13 @@ logger = get_logger(__name__)
 DATABASE_URI = f"postgresql+psycopg2://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
 engine = create_engine(DATABASE_URI)
 
-@router.post("/upload_excel")
-async def upload_excel(file: UploadFile = File(...)):
+@router.post("/upload_excel_to_create_dataset")
+async def upload_excel(
+    file: UploadFile = File(...),
+    database_id: int = Form(...)
+):
     try:
-        logger.info(f"Nhận yêu cầu upload file: {file.filename}")
+        logger.info(f"Nhận yêu cầu upload file: {file.filename} với Database ID: {database_id}")
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
         table_name = os.path.splitext(file.filename)[0]
@@ -29,7 +31,7 @@ async def upload_excel(file: UploadFile = File(...)):
         logger.info(f"Lưu dữ liệu vào bảng: {table_name}")
 
         dataset_payload = {
-            "database": 110,  # Thay đổi ID cơ sở dữ liệu nếu cần
+            "database": database_id,  # Nhận từ input
             "table_name": table_name,
             "schema": "public",
             "sql": f"SELECT * FROM {table_name}"

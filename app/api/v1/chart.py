@@ -11,7 +11,7 @@ import logging
 router = APIRouter()
 logger = get_logger(__name__)  # Sử dụng get_logger
 
-@router.post("/create_chart")
+@router.post("/create_chart_pie")
 def create_chart(request: ChartRequest):
     try:
         logger.info(f"Nhận yêu cầu tạo biểu đồ: {request.slice_name}")

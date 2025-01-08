@@ -26,3 +26,5 @@ source/venv/bin/activate
   ```
   uvicorn main:app --reload
   ```
+
+Để tạo 1 biểu đồ, trước hết  hãy vào giao diện superset và kết nối với database bằng cách vào setting -> database connection -> connet to postgres -> sau đó lấy id
