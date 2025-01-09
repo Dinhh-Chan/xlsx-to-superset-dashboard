@@ -89,7 +89,7 @@ Parameter requets
 
 Tác dụng: Tạo 1 piechart và trả về id của piechart đó
 
-Param requests 
+Param requests
 
 ```
 {
@@ -241,3 +241,7 @@ Có thể thay đổi thành các phương thức khác như count, avg v.v...
 ```
 
 Có thể thay Colume_name để thay đổi các trường thông tin cần thống kê
+
+#### /api/v1/embeadcode/get_embeadcode
+
+Param truyền vào: id của chart
