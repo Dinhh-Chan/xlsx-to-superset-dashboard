@@ -9,5 +9,5 @@ api_router.include_router(database_router, prefix="/database", tags=["Database"]
 api_router.include_router(chart_router, prefix="/chart", tags=["Chart"])
 api_router.include_router(dashboard_router, prefix="/dashboard", tags=["Dashboard"])
 api_router.include_router(upload_router, prefix="/upload", tags=["Upload"])
-api_router.include_router(form_data_router, prefix="/formdata", tags=["Formdata"])
+api_router.include_router(form_data_router, prefix="/embeadcode", tags=["Link embeadcode"])
 

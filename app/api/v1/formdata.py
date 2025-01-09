@@ -15,7 +15,7 @@ class FormDataRequests(BaseModel):
 def get_headers_dependency():
     return get_superset_headers()
 
-@router.post("/get_form_data")
+@router.post("/get_embeadcode")
 def get_form_data(
     request: FormDataRequests = Body(..., description="Yêu cầu chứa slice_id"),
     headers: Dict[str, str] = Depends(get_headers_dependency)
