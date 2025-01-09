@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.utils.logger import get_logger
 import requests
 from typing import Dict, Any
-
+import json
 router = APIRouter()
 logger = get_logger(__name__)
 
@@ -48,7 +48,7 @@ def create_chart(request: PieChartRequest, headers: Dict[str, str]) -> Dict[str,
     # Send request to Superset API to create chart
     chart_url = f"{settings.SUPERSET_URL}/api/v1/chart/"
     chart_response = requests.post(chart_url, headers=headers, json=chart_payload)
-
+    logger.info(f"")
     if chart_response.status_code != 201:
         logger.error(f"Failed to create chart: {chart_response.text}")
         raise HTTPException(status_code=chart_response.status_code, detail=chart_response.text)
@@ -59,12 +59,11 @@ def create_chart(request: PieChartRequest, headers: Dict[str, str]) -> Dict[str,
         raise HTTPException(status_code=500, detail="Superset did not return a chart ID.")
 
     logger.info(f"Chart created successfully with ID: {chart_id}")
-    return {"message": "Chart created successfully", "chart_id": chart_id}
+    return {"chart_id": chart_id}
 
 # Dependency to fetch headers
 def get_headers_dependency():
     return get_superset_headers()
-
 @router.post("/create_chart_pie")
 def create_chart_pie(
     request: PieChartRequest, 

@@ -20,10 +20,3 @@ class PieChartRequest(BaseModel):
     slice_name: str = Field(..., example="Tỷ lệ Giới Tính Sinh Viên")
     viz_type: str = Field(..., example="pie")
 
-    @validator('params')
-    def validate_params(cls, v):
-        try:
-            json.loads(v)
-        except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON in params: {str(e)}")
-        return v
