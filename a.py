@@ -98,13 +98,11 @@ def create_dashboard(name):
 def get_shot(id):
     try:
         session = get_superset_session()
-        formdata_url = f"{SUPERSET_URL}/api/v1/explore/"
+        formdata_url = f"{SUPERSET_URL}/api/v1/explore/?slice_id={id}"
         response = requests.get(formdata_url, params={
 			"slice_id": id
 		})
-        # print(formdata_url)
         data = response.json()
-        # print(data)
         payload_permanlink = {
             "formData": data["result"]["form_data"],
             "urlParams":[]
