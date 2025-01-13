@@ -95,27 +95,50 @@ def create_dashboard(name):
     return dashboard_id
 
 
-def get_shot(id):
+def get_chart_permalink(slice_id):
+    """
+    Hàm trả về permalink (URL) cho chart (slice) có ID = slice_id.
+    """
     try:
+        # 1. Tạo session (đã đăng nhập)
         session = get_superset_session()
-        formdata_url = f"{SUPERSET_URL}/api/v1/explore/?slice_id={id}"
-        response = requests.get(formdata_url, params={
-			"slice_id": id
-		})
+
+        # 2. Lấy form_data
+        explore_url = f"{SUPERSET_URL}/api/v1/explore/"
+        response = session.get(explore_url, params={"slice_id": slice_id})
+        response.raise_for_status()
         data = response.json()
-        payload_permanlink = {
-            "formData": data["result"]["form_data"],
-            "urlParams":[]
-        }
-        permanlink_url = f"{SUPERSET_URL}/api/v1/explore/permalink"
-        response_permanlink = requests.post(permanlink_url, json=payload_permanlink)
-        data_response_permanlink= response_permanlink.json()
-        print(data_response_permanlink)
-        data_response_permanlink["url"] = SUPERSET_URL + data_response_permanlink["url"].split("None")[1]+ "?standalone=1&height=400"
         
-        return {"data": data_response_permanlink}
+        form_data = data.get("result", {}).get("form_data")
+        if not form_data:
+            raise ValueError(f"Không tìm thấy 'form_data' cho chart {slice_id}.")
+
+        # 3. Tạo permalink
+        permalink_url = f"{SUPERSET_URL}/api/v1/explore/permalink"
+        payload = {
+            "formData": form_data,
+            "urlParams": []
+        }
+        res_perma = session.post(permalink_url, json=payload)
+        res_perma.raise_for_status()
+
+        perma_data = res_perma.json()
+        original_url = perma_data.get("url")
+        if not original_url:
+            raise ValueError("Không có 'url' trong phản hồi permalink.")
+
+        # 4. Xử lý url trả về thành link đầy đủ
+        if not original_url.startswith("http"):
+            original_url = SUPERSET_URL.rstrip('/') + original_url
+        
+        # Nếu muốn hiển thị embed, standalone = 1, height = 400
+        final_url = f"{original_url}?standalone=1&height=400"
+
+        return final_url
+
     except Exception as e:
-        print(e)
+        print(f"Lỗi khi tạo permalink cho chart {slice_id}: {e}")
+        return None
 
 def create_chart(request):
 	dashboard_id = create_dashboard(request.chart_name)
@@ -135,5 +158,5 @@ def create_chart(request):
         "chart_id": chart_id,
 	}
 
-print(get_shot(59))
+print(get_chart_permalink(365))
 # print(get_dashboard(6))

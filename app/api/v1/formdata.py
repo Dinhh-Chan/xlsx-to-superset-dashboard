@@ -36,7 +36,6 @@ def get_form_data(
                 status_code=response.status_code,
                 detail=f"Không thể lấy dữ liệu từ Superset: {response.text}"
             )
-        
         data = response.json()
         payload_permanlink = {
             "formData": data["result"]["form_data"],
@@ -45,6 +44,7 @@ def get_form_data(
         permanlink_url = f"{settings.SUPERSET_URL}/api/v1/explore/permalink"
         response_permanlink = requests.post(permanlink_url, headers=headers, json= payload_permanlink)
         data_response_permanlink= response_permanlink.json()
+        print( data_response_permanlink)
         data_response_permanlink["url"] = "http://localhost:8088"+ data_response_permanlink["url"].split("None")[1]+ "?standalone=1&height=400"
         
         return {"data": data_response_permanlink}
